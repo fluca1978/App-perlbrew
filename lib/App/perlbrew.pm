@@ -234,15 +234,8 @@ sub files_are_the_same {
         my $body = <$fh>;
         close $fh;
 
-        die 'Page not retrieved; HTTP error code 400 or above.'
-            if $program eq 'curl' # Exit code is 22 on 404s etc
-            and $? >> 8 == 22; # exit code is packed into $?; see perlvar
-        die 'Page not retrieved: fetch failed.'
-            if $program eq 'fetch' # Exit code is not 0 on error
-            and $?;
-        die 'Server issued an error response.'
-            if $program eq 'wget' # Exit code is 8 on 404s etc
-            and $? >> 8 == 8;
+        # check if the download has failed and die automatically
+        $commands{ $program }{ die_on_error }->( $? );
 
         return $cb ? $cb->($body) : $body;
     }
